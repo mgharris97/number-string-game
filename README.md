@@ -2,7 +2,7 @@
 
 A deterministic two-player game with perfect information, where a human plays against a computer. The computer uses either the **Minimax** or **Alpha-Beta pruning** algorithm to select its moves.
 
-Built with Python and Tkinter as part of a university AI search-based problem-solving assignment.
+Built with Python and Tkinter
 
 ---
 
@@ -64,7 +64,7 @@ number-string-game/
 Clone the repository and set up the environment:
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/number-string-game.git
+git clone https://github.com/mgharris97/number-string-game/tree/main
 cd number-string-game
 python3 -m venv venv
 source venv/bin/activate
