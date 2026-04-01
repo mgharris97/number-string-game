@@ -50,7 +50,7 @@ class GameState:
             moves.append({'type': 'pair', 'pair_idx': p})
 
         # Delete only when length is odd (last element has no partner)
-        if n % 2 != 0:
+        if n % 2 != 0 and n > 1:
             moves.append({'type': 'delete'})
 
         return moves
