@@ -1,127 +1,62 @@
-import time
+import math
 from src.game_state import GameState
 
-
-def heuristic(state: GameState) -> float:
+def heuristic_evaluation(state: GameState, perspective: str = 'first') -> float:
     """
-    Evaluate a non-terminal state.
-
-    Positive values favour 'first', negative values favour 'second'.
-    Called when the search reaches its depth limit.
-
-    Parameters
-    ----------
-    state : current game state to evaluate
-
-    Returns
-    -------
-    float : heuristic score
+    Evaluate a non‑terminal state from the given player's perspective.
+    Returns a number: positive means good for that player, negative means bad.
+    Placeholder – you can replace with a smarter heuristic.
     """
-    n:           int   = len(state.nums)
-    total:       int   = state.points + state.bank
-    score:       float = 0.0
-
-    # Parity of running total — even total favours first player
-    score += 4.0 if total % 2 == 0 else -4.0
-
-    # Parity bias of remaining numbers
-    even_count:  int   = sum(1 for x in state.nums if x % 2 == 0)
-    odd_count:   int   = n - even_count
-    score += (even_count - odd_count) * 1.5
-
-    # Bank adds to total score — more bank slightly favours first
-    score += state.bank * 0.8
-
-    # Even length means no forced delete next turn — slightly more control
-    score += 2.0 if n % 2 == 0 else -2.0
-
-    return score
-
-
-def minimax(
-    state:   GameState,
-    depth:   int,
-    is_max:  bool,
-    counter: dict[str, int],
-) -> float:
-    """
-    Minimax algorithm with N-ply lookahead.
-
-    Parameters
-    ----------
-    state   : current game state
-    depth   : plies remaining
-    is_max  : True if the current player is maximising ('first')
-    counter : mutable node counter — incremented on every call
-
-    Returns
-    -------
-    float : evaluated score of the state
-    """
-    counter['nodes'] += 1
-
-    # Base case — terminal state or depth limit reached
-    if state.is_terminal() or depth == 0:
-        result = state.get_result()
-        if result == 'first':  return  100 + depth
-        if result == 'second': return -(100 + depth)
-        if result == 'draw':   return  0
-        return heuristic(state)
-
-    moves = state.get_moves()
-
-    if is_max:
-        best: float = float('-inf')
-        for move in moves:
-            val  = minimax(state.apply_move(move), depth - 1, False, counter)
-            best = max(best, val)
-        return best
+    # Very simple heuristic: difference in total points (including bank)
+    total = state.points + state.bank
+    if perspective == 'first':
+        return total  # not zero-sum, but we can treat as score difference? Actually points are shared.
     else:
-        best: float = float('inf')
-        for move in moves:
-            val  = minimax(state.apply_move(move), depth - 1, True, counter)
-            best = min(best, val)
-        return best
+        return -total
+    # Better: we might incorporate future opportunities, but for now 0.
+    # Let's keep it simple: return 0 for all non-terminal (depth-limited search only).
+    return 0.0
 
-
-def get_best_move(
-    state: GameState,
-    depth: int,
-) -> dict[str, object]:
+def minimax(state: GameState, depth: int, maximizing_player: bool) -> tuple[float, dict | None]:
     """
-    Find the best move for the current player using Minimax.
-
-    Parameters
-    ----------
-    state : current game state
-    depth : number of plies to search
-
-    Returns
-    -------
-    dict with keys:
-        move     : dict   — the best move found
-        nodes    : int    — total nodes evaluated
-        time_ms  : float  — time taken in milliseconds
+    Minimax search (without pruning).
+    Returns (value, best_move).  value is from the perspective of the first player.
+    If depth == 0 or terminal, heuristic/result is returned.
     """
-    counter:   dict[str, int]  = {'nodes': 0}
-    is_first:  bool            = state.turn == 'first'
-    best_move: dict | None     = None
-    best_val:  float           = float('-inf') if is_first else float('inf')
-    t0:        float           = time.time()
+    if state.is_terminal():
+        result = state.get_result()
+        # Convert result to numeric from first player's perspective:
+        if result == 'first':
+            return 1.0, None
+        elif result == 'second':
+            return -1.0, None
+        else:
+            return 0.0, None
 
-    for move in state.get_moves():
-        child = state.apply_move(move)
-        val   = minimax(child, depth - 1, not is_first, counter)
+    if depth == 0:
+        # Heuristic from first player's perspective
+        return heuristic_evaluation(state, perspective='first'), None
 
-        if is_first and val > best_val:
-            best_val  = val
-            best_move = move
-        elif not is_first and val < best_val:
-            best_val  = val
-            best_move = move
+    possible_moves = state.get_moves()
+    if not possible_moves:
+        return 0.0, None   # should not happen
 
-    return {
-        'move':    best_move,
-        'nodes':   counter['nodes'],
-        'time_ms': (time.time() - t0) * 1000,
-    }
+    best_move = possible_moves[0]
+    if maximizing_player:   # first player to move
+        best_value = -math.inf
+        for move in possible_moves:
+            next_state = state.apply_move(move)
+            value, _ = minimax(next_state, depth - 1, False)
+            if value > best_value:
+                best_value = value
+                best_move = move
+        return best_value, best_move
+    else:                   # second player to move
+        best_value = math.inf
+        for move in possible_moves:
+            next_state = state.apply_move(move)
+            value, _ = minimax(next_state, depth - 1, True)
+            if value < best_value:
+                best_value = value
+                best_move = move
+        return best_value, best_move
