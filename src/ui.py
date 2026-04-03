@@ -203,7 +203,7 @@ class App:
             highlightbackground=BORDER, highlightthickness=1,
             cursor='hand2', command=self._execute_delete)
         self.btn_delete.pack(side='left', expand=True, fill='x', padx=(0, 6))
-        tk.Button(ctrl, text='Reset', font=FONT_BTN, bg=PANEL, fg=ACCENT,
+        tk.Button(ctrl, text='Start Over', font=FONT_BTN, bg=PANEL, fg=ACCENT,
                   relief='flat', pady=7, cursor='hand2',
                   highlightbackground=BORDER, highlightthickness=1,
                   activeforeground=ACCENT,
