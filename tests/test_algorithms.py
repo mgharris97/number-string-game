@@ -109,7 +109,6 @@ def test_alphabeta_agrees_with_minimax(seed: int) -> None:
 
 
 # ── Efficiency — Alpha-Beta must use fewer or equal nodes ─────────────────────
-
 @pytest.mark.parametrize("seed", [1, 2, 3, 4, 5])
 def test_alphabeta_fewer_or_equal_nodes(seed: int) -> None:
     """Alpha-Beta should never evaluate more nodes than Minimax."""
@@ -123,7 +122,6 @@ def test_alphabeta_fewer_or_equal_nodes(seed: int) -> None:
 
 
 # ── Experiments tracker ───────────────────────────────────────────────────────
-
 def test_experiment_tracker_records_game() -> None:
     from src.experiments import ExperimentTracker
     tracker: ExperimentTracker = ExperimentTracker()
