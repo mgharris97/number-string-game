@@ -1,46 +1,38 @@
-import time
+# Matthew Harris
+# March 29, 2026
+
+# import time to measure how long the computer will take to make a move
+import time 
 from src.game_state import GameState
-from src.minimax import heuristic
+# reuse the heuristic from minmax as there is no need to rewrite it
+from src.minimax import heuristic 
 
 
 def alphabeta(
-    state:   GameState,
-    depth:   int,
-    alpha:   float,
-    beta:    float,
-    is_max:  bool,
-    counter: dict[str, int],
+    state:   GameState,         # the current position in the game
+    depth:   int,               # how many more levels are allowed to look ahead
+    alpha:   float,             # best score the maximizer cal already guarantee
+    beta:    float,             # best score the minimizer can already gurantee
+    is_max:  bool,              # boolean to check if it is the maximizers turn (true)
+    counter: dict[str, int],    # visited node counter 
 ) -> float:
-    """
-    Alpha-Beta pruning algorithm with N-ply lookahead.
-
-    Produces identical results to Minimax but evaluates fewer nodes
-    by pruning branches that cannot affect the final decision.
-
-    Parameters
-    ----------
-    state   : current game state
-    depth   : plies remaining
-    alpha   : best score the maximiser can guarantee so far
-    beta    : best score the minimiser can guarantee so far
-    is_max  : True if the current player is maximising ('first')
-    counter : mutable node counter — incremented on every call
-
-    Returns
-    -------
-    float : evaluated score of the state
-    """
+    
+    # Node counter. Every call to alphabeta increments this by one regardless if the node gets pruned or not. 
+    # So for example, the it will increment by 1 after the first move
     counter['nodes'] += 1
 
-    # Base case — terminal state or depth limit reached
+    # Recursion stops if the the game is over due to one number remaining or if we've reached the depth limit
+    # is_terminal() is define within game_state and just checks if only one number is left in the string. 
     if state.is_terminal() or depth == 0:
         result = state.get_result()
         if result == 'first':  return  100 + depth
         if result == 'second': return -(100 + depth)
         if result == 'draw':   return  0
         return heuristic(state)
+    # If the game is over we return a definitive score. 
 
     moves = state.get_moves()
+
 
     if is_max:
         best: float = float('-inf')
