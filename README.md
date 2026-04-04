@@ -14,7 +14,7 @@ Built with Python and Tkinter
 | Nizzah | Minimax algorithm (`src/minimax.py`) |
 | Matthew | Alpha-Beta algorithm (`src/alphabeta.py`) |
 | Ilham | Tests (`tests/`) |
-| Teammate 5 | Experiments & stats (`src/experiments.py`) |
+| Omar | Experiments & stats (`src/experiments.py`), UI (`src/ui.py`) |
 
 ---
 
@@ -101,8 +101,8 @@ Each team member works on their own branch and then just merges to the main bran
 | Nizzah | Minimax algorithm (`src/minimax.py`) |
 | Matthew | Alpha-Beta algorithm (`src/alphabeta.py`) |
 | Ilham | Tests (`tests/`) |
-| Teammate 5 | Experiments & stats (`src/experiments.py`) |
- 
+| Omar | Experiments & stats (`src/experiments.py`), UI (`src/ui.py`) |
+
 **Setup — do this once after cloning:**
  
 ```bash
@@ -118,7 +118,7 @@ git commit -m "describe what you did"
 git push -u origin your-branch-name
 ```
  
-**Staying up to date** — whenever youc come to work on the project, pull changes from `main`
+**Staying up to date** — whenever you come to work on the project, pull changes from `main`
  
 ```bash
 git checkout main

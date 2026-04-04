@@ -37,6 +37,8 @@ UNPAIR_BD   = '#fde047'
 SINGLE_BG   = '#fce7f3'
 SINGLE_FG   = '#9d174d'
 SINGLE_BD   = '#f9a8d4'
+COMP_HL_BG  = '#fed7aa'
+COMP_HL_BD  = '#f97316'
 
 LOG_HUMAN   = '#1d4ed8'
 LOG_COMP    = '#15803d'
@@ -70,6 +72,7 @@ class App:
         self.total_nodes = 0
         self.move_times: list[float] = []
         self.game_active = False
+        self.last_comp_move = None
 
         self._build_ui()
         self._show_setup()
@@ -87,6 +90,10 @@ class App:
                  bg=BG, fg=TEXT).pack(side='left')
         tk.Label(hdr, text='  human vs computer', font=FONT_SUB,
                  bg=BG, fg=TEXT_DIM).pack(side='left')
+        tk.Button(hdr, text='Rules', font=FONT_BTN, bg=CARD, fg=TEXT,
+                  relief='flat', padx=10, pady=4, cursor='hand2',
+                  highlightbackground=BORDER, highlightthickness=1,
+                  command=self._show_rules).pack(side='right')
 
         # Divider
         tk.Frame(self.root, bg=BORDER, height=1).pack(fill='x')
@@ -329,6 +336,45 @@ class App:
             self.btn_tab_exp.configure(bg=ACCENT, fg='white')
             self.btn_tab_log.configure(bg=CARD, fg=TEXT_DIM)
 
+    # ── Rules dialog ─────────────────────────────────────────────────────────
+
+    def _show_rules(self) -> None:
+        win = tk.Toplevel(self.root)
+        win.title('Game Rules')
+        win.configure(bg=PANEL)
+        win.resizable(False, False)
+        win.geometry('480x420')
+        rules = (
+            "NUMBER STRING GAME — RULES\n"
+            "\n"
+            "A string of 15–25 numbers (each 1–6) is generated randomly.\n"
+            "Two players take turns. Each turn you must do one of:\n"
+            "\n"
+            "PAIR — choose a fixed adjacent pair (1st+2nd, 3rd+4th, …)\n"
+            "and replace them with their sum.\n"
+            "  • If the sum > 6, apply substitution:\n"
+            "    7→1, 8→2, 9→3, 10→4, 11→5, 12→6\n"
+            "  • Pairing adds +1 point.\n"
+            "  • If substitution was used, +1 to the bank.\n"
+            "\n"
+            "DELETE — only when the string length is odd.\n"
+            "  Removes the last unpaired number. Costs −1 point.\n"
+            "\n"
+            "Every move shrinks the string by 1. The game ends\n"
+            "when one number remains.\n"
+            "\n"
+            "WINNING CONDITION (bank is added to points):\n"
+            "  • Final number even AND total score even → First wins\n"
+            "  • Final number odd AND total score odd → Second wins\n"
+            "  • Otherwise → Draw"
+        )
+        tk.Label(win, text=rules, font=FONT_LOG, bg=PANEL, fg=TEXT,
+                 justify='left', anchor='nw', padx=20, pady=20).pack(
+            fill='both', expand=True)
+        tk.Button(win, text='Close', font=FONT_BTN, bg=CARD, fg=TEXT,
+                  relief='flat', pady=6, cursor='hand2',
+                  command=win.destroy).pack(pady=(0, 16))
+
     # ── Game lifecycle ────────────────────────────────────────────────────────
 
     def _start_game(self) -> None:
@@ -338,9 +384,11 @@ class App:
         self.comp_role   = 'second' if starter == 'human'    else 'first'
         nums             = [random.randint(1, 6) for _ in range(length)]
         self.game_state  = GameState(nums, 0, 0, 'first')
-        self.total_nodes = 0
-        self.move_times  = []
-        self.game_active = True
+        self.total_nodes    = 0
+        self.move_times     = []
+        self.move_count     = 0
+        self.last_comp_move = None
+        self.game_active    = True
         self._show_game()
         self._clear_log()
         self._log(f'Game started — [{", ".join(map(str, nums))}]', 'info')
@@ -369,12 +417,14 @@ class App:
         for w in self.num_canvas.winfo_children():
             w.destroy()
 
+        hl = self.last_comp_move  # index to highlight (or None)
         num_pairs = n // 2
         for p in range(num_pairs):
             i1, i2 = p * 2, p * 2 + 1
-            bg = EVEN_BG if p % 2 == 0 else ODD_BG
+            highlighted = hl is not None and (i1 == hl or i2 == hl)
+            bg = COMP_HL_BG if highlighted else (EVEN_BG if p % 2 == 0 else ODD_BG)
             fg = EVEN_FG if p % 2 == 0 else ODD_FG
-            bd = EVEN_BD if p % 2 == 0 else ODD_BD
+            bd = COMP_HL_BD if highlighted else (EVEN_BD if p % 2 == 0 else ODD_BD)
             slot = tk.Frame(self.num_canvas, bg=BG)
             slot.pack(side='left', padx=(0, 6))
             cells = tk.Frame(slot, bg=bd, padx=1, pady=1)
@@ -455,13 +505,15 @@ class App:
     def _execute_pair(self, pair_idx: int) -> None:
         if not self.game_active or self.game_state.turn != self.human_role:
             return
+        self.last_comp_move = None
         from src.game_state import mod6
         i1, i2  = pair_idx * 2, pair_idx * 2 + 1
         a, b    = self.game_state.nums[i1], self.game_state.nums[i2]
         raw     = a + b
         val, sub = mod6(raw)
+        self.move_count += 1
         self._log(
-            f'You  →  pair {pair_idx+1}: ({a}, {b}) = {raw}'
+            f'#{self.move_count}  You  →  pair {pair_idx+1}: ({a}, {b}) = {raw}'
             + (f' → {val}' if sub else '')
             + f'  |  +1 pt' + ('  +1 bank' if sub else ''),
             'human')
@@ -473,8 +525,10 @@ class App:
     def _execute_delete(self) -> None:
         if not self.game_active or self.game_state.turn != self.human_role:
             return
+        self.last_comp_move = None
         val = self.game_state.nums[-1]
-        self._log(f'You  →  delete unpaired: {val}  |  −1 pt', 'human')
+        self.move_count += 1
+        self._log(f'#{self.move_count}  You  →  delete unpaired: {val}  |  −1 pt', 'human')
         self.game_state = self.game_state.apply_move({'type': 'delete'})
         self._render()
         self._check_end()
@@ -494,7 +548,13 @@ class App:
             return
         self.total_nodes += res['nodes']
         self.move_times.append(res['time_ms'])
+        self.move_count += 1
         m = res['move']
+        # Track which index in the new array the computer's result lands at
+        if m['type'] == 'pair':
+            self.last_comp_move = m['pair_idx'] * 2
+        else:
+            self.last_comp_move = -1  # delete — highlight last cell before removal
         from src.game_state import mod6
         if m['type'] == 'pair':
             i1, i2  = m['pair_idx'] * 2, m['pair_idx'] * 2 + 1
@@ -502,14 +562,14 @@ class App:
             raw     = a + b
             val, sub = mod6(raw)
             self._log(
-                f'Comp →  pair {m["pair_idx"]+1}: ({a}, {b}) = {raw}'
+                f'#{self.move_count}  Comp →  pair {m["pair_idx"]+1}: ({a}, {b}) = {raw}'
                 + (f' → {val}' if sub else '')
                 + f'  |  +1 pt' + ('  +1 bank' if sub else '')
                 + f'  [{res["nodes"]} nodes, {round(res["time_ms"])}ms]',
                 'comp')
         else:
             self._log(
-                f'Comp →  delete: {self.game_state.nums[-1]}'
+                f'#{self.move_count}  Comp →  delete: {self.game_state.nums[-1]}'
                 + f'  |  −1 pt  [{res["nodes"]} nodes, {round(res["time_ms"])}ms]',
                 'comp')
         self.game_state = self.game_state.apply_move(m)

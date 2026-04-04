@@ -21,18 +21,25 @@ def heuristic(state: GameState) -> float:
     total:       int   = state.points + state.bank
     score:       float = 0.0
 
-    # Parity of running total — even total favours first player
+    # Weight: 4.0 — highest weight because the win condition directly checks
+    # whether the total score is even or odd, making this the strongest signal.
     score += 4.0 if total % 2 == 0 else -4.0
 
-    # Parity bias of remaining numbers
+    # Weight: 1.5 — more even numbers make future sums more likely to be even,
+    # indirectly influencing the final number's parity. Moderate weight because
+    # it is a predictor, not a direct factor in the win condition.
     even_count:  int   = sum(1 for x in state.nums if x % 2 == 0)
     odd_count:   int   = n - even_count
     score += (even_count - odd_count) * 1.5
 
-    # Bank adds to total score — more bank slightly favours first
+    # Weight: 0.8 — the bank is added to points at game end, so each extra
+    # bank point shifts the total by 1. Low weight because one point only
+    # flips parity, it does not compound.
     score += state.bank * 0.8
 
-    # Even length means no forced delete next turn — slightly more control
+    # Weight: 2.0 — even string length means no forced delete on the next
+    # turn, giving the current player more choice. Meaningful but less
+    # decisive than the total score parity itself.
     score += 2.0 if n % 2 == 0 else -2.0
 
     return score

@@ -5,16 +5,16 @@
 import time
 from src.game_state import GameState
 
-# reuse the heuristic from minmax as there is no need to rewrite it
+# reuse the heuristic from minimax as there is no need to rewrite it
 from src.minimax import heuristic
-# The heuristic is what looks at a game position that isn't finished yet and returns a number estimating how good it is. It's located in minmax.py
+# The heuristic is what looks at a game position that isn't finished yet and returns a number estimating how good it is. It's located in minimax.py
 
 
 def alphabeta(
     state: GameState,           # the current position in the game
     depth: int,                 # how many more levels are allowed to look ahead
-    alpha: float,               # best score the maximizer cal already guarantee
-    beta: float,                # best score the minimizer can already gurantee
+    alpha: float,               # best score the maximizer can already guarantee
+    beta: float,                # best score the minimizer can already guarantee
     is_max: bool,               # boolean to check if it is the maximizers turn (true)
     counter: dict[str, int],    # visited node counter
 ) -> float:
@@ -40,7 +40,7 @@ def alphabeta(
     # The algorithm then loops over this list and evaluates each move one by one to decide which one is best. 
     moves = state.get_moves()
 
-    # cecks if it's maximizers turn otherwise it's the minimizers turn
+    # checks if it's maximizers turn otherwise it's the minimizers turn
 
     if is_max:
         best: float = float("-inf") # set maximizers starting score to negative infinity since anyting is better than negative infinity
@@ -58,7 +58,7 @@ def alphabeta(
         return best
     else:
         # minimizers turn
-        # same recursive call as maximizer except its a mirror image as minimizer wants theh lowest posible score 
+        # same recursive call as maximizer except its a mirror image as minimizer wants the lowest possible score
         best: float = float("inf")
         for move in moves:
             val = alphabeta(
