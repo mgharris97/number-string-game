@@ -45,12 +45,7 @@ def heuristic(state: GameState) -> float:
     return score
 
 
-def minimax(
-    state:   GameState,
-    depth:   int,
-    is_max:  bool,
-    counter: dict[str, int],
-) -> float:
+def minimax(state: GameState, depth: int, is_max:  bool, counter: dict[str, int]) -> float:
     """
     Minimax algorithm with N-ply lookahead.
 
@@ -70,9 +65,12 @@ def minimax(
     # Base case — terminal state or depth limit reached
     if state.is_terminal() or depth == 0:
         result = state.get_result()
-        if result == 'first':  return  100 + depth
-        if result == 'second': return -(100 + depth)
-        if result == 'draw':   return  0
+        if result == 'first':  
+            return  100 + depth
+        if result == 'second': 
+            return -(100 + depth)
+        if result == 'draw':   
+            return  0
         return heuristic(state)
 
     moves = state.get_moves()
