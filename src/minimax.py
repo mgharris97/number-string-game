@@ -8,7 +8,7 @@ from src.game_state import GameState
 # The heuristic returns a float: positive values favour the first player,
 # negative values favour the second player.
 #
-# I designed this heuristic after experimenting with several features.
+# We designed this heuristic after experimenting with several features.
 # Each feature is multiplied by a weight that I tuned manually.
 # ----------------------------------------------------------------------
 def heuristic(state: GameState) -> float:
@@ -71,7 +71,7 @@ def minimax(state: GameState, depth: int, is_max: bool, counter: dict[str, int])
     if state.is_terminal() or depth == 0:
         result = state.get_result()
         if result == 'first':
-            # First player wins. I add a small bonus (+depth) to prefer
+            # First player wins. We add a small bonus (+depth) to prefer
             # wins that happen sooner (shorter path). This encourages the AI
             # to win faster and avoid unnecessary moves.
             return 100 + depth
@@ -79,7 +79,7 @@ def minimax(state: GameState, depth: int, is_max: bool, counter: dict[str, int])
             # Second player wins. Negative with depth bonus to prefer earlier losses?
             # Actually, here negative with +depth makes the value less negative
             # when depth is larger. That means losing later is slightly better.
-            # I chose this to make the AI delay loss if it cannot avoid it.
+            # We chose this to make the AI delay loss if it cannot avoid it.
             return -(100 + depth)
         if result == 'draw':
             return 0
@@ -145,14 +145,12 @@ def get_best_move(state: GameState, depth: int) -> dict[str, object]:
     }
 
 
-# =========================================================================
-# PERSONAL NOTES FOR DEFENSE (not part of the code, but for explanation)
-# =========================================================================
-#
-# 1. Why did I choose these heuristic weights?
-#    - I ran a small tournament: AI vs AI with different weight sets.
+# NOTES
+
+# 1. Why did we choose these heuristic weights?
+#    - We ran a small tournament: AI vs Human with different weight sets.
 #    - The weights shown gave the highest win rate against a simple baseline.
-#    - I did not use machine learning; I tuned manually over ~200 games.
+#    - We did not use machine learning; We tuned manually over ~20 games.
 #
 # 2. What is the effect of the `+ depth` bonus in terminal states?
 #    - It makes the AI prefer winning in fewer moves (shorter path).
@@ -160,13 +158,12 @@ def get_best_move(state: GameState, depth: int) -> dict[str, object]:
 #    - This is a common trick to make the AI play more "naturally".
 #
 # 3. Why no alpha‑beta pruning in this version?
-#    - I implemented alpha‑beta separately in `alphabeta.py`.
+#    - We implemented alpha‑beta separately in `alphabeta.py`.
 #    - This minimax version is kept clean for understanding and testing.
-#    - In the final UI, I actually use alpha‑beta because it's faster.
+#    - In the final UI, We actually choose between alpha‑beta or Minimax.
 #
 # 4. How do I choose the depth?
-#    - For human vs AI, I set depth = 5. This gives < 0.5 sec per move.
-#    - For experiments, I use depth = 4 to run many games quickly.
+#    - For human vs AI, We set depth up to 6 . This gives < 0.5 sec per move.
 #    - Depth > 6 becomes too slow without pruning.
 #
 # 5. Example of how the heuristic works:
@@ -177,12 +174,12 @@ def get_best_move(state: GameState, depth: int) -> dict[str, object]:
 #    length odd -> -2.0
 #    Total heuristic = -4.0 + 1.5 - 2.0 = -4.5 (favours second player)
 #
-# 6. Limitations I observed:
+# 6. Limitations we observed:
 #    - The heuristic still ignores the exact value of the final number.
 #    - It cannot foresee forced sequences that lead to a specific final parity.
 #    - Against a perfect player, depth 5 is often not enough.
 #
-# 7. How I tested correctness:
+# 7. How we tested correctness:
 #    - Unit tests for terminal states (return 100+depth, etc.)
 #    - Verified that get_best_move returns a legal move.
 #    - Compared values with a brute‑force search for small strings (length <= 5).
