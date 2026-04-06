@@ -50,13 +50,15 @@ def minimax(state: GameState, depth: int, is_max:  bool, counter: dict[str, int]
         return heuristic(state)
 
     moves = state.get_moves()
-
+#Maximising Player
     if is_max:
         best: float = float('-inf')
+        #try each move, apply it, and repeatedly evaluate the child state
         for move in moves:
             val  = minimax(state.apply_move(move), depth - 1, False, counter)
             best = max(best, val)
         return best
+ #Minimising Player       
     else:
         best: float = float('inf')
         for move in moves:
