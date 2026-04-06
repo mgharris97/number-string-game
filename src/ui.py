@@ -10,9 +10,7 @@ from src.alphabeta import get_best_move as alphabeta_best
 from src.experiments import ExperimentTracker
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# COLOURS
-# ─────────────────────────────────────────────────────────────────────────────
+# Colors
 
 BG          = '#f5f4f0'
 PANEL       = '#ffffff'
@@ -51,9 +49,7 @@ FONT_LOG    = ('Courier', 10)
 FONT_SCORE  = ('Courier', 16, 'bold')
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# APP
-# ─────────────────────────────────────────────────────────────────────────────
+# PP
 
 class App:
     def __init__(self, root: tk.Tk) -> None:
@@ -77,7 +73,7 @@ class App:
     def run(self) -> None:
         self.root.mainloop()
 
-    # ── Build UI ──────────────────────────────────────────────────────────────
+    # Build UI
 
     def _build_ui(self) -> None:
         # Header
@@ -213,7 +209,7 @@ class App:
                   activeforeground=ACCENT,
                   command=self._reset_game).pack(side='left')
 
-        # ── Right column ──
+        # Right column
         right = tk.Frame(self.game_frame, bg=BG, width=290)
         right.pack(side='right', fill='both')
         right.pack_propagate(False)
@@ -310,7 +306,7 @@ class App:
                  bg=CARD, fg=TEXT).pack()
         return var
 
-    # ── Show / hide ───────────────────────────────────────────────────────────
+    # How / Hide
 
     def _show_setup(self) -> None:
         self.game_frame.pack_forget()
@@ -333,7 +329,7 @@ class App:
             self.btn_tab_exp.configure(bg=ACCENT, fg='white')
             self.btn_tab_log.configure(bg=CARD, fg=TEXT_DIM)
 
-    # ── Rules dialog ─────────────────────────────────────────────────────────
+    # Rules dialog
 
     def _show_rules(self) -> None:
         win = tk.Toplevel(self.root)
@@ -372,7 +368,7 @@ class App:
                   relief='flat', pady=6, cursor='hand2',
                   command=win.destroy).pack(pady=(0, 16))
 
-    # ── Game lifecycle ────────────────────────────────────────────────────────
+    # Game Lifecycle
 
     def _start_game(self) -> None:
         length           = max(15, min(25, int(self.var_len.get())))
@@ -399,7 +395,7 @@ class App:
         self.game_state  = None
         self._show_setup()
 
-    # ── Render ────────────────────────────────────────────────────────────────
+    # Render
 
     def _render(self) -> None:
         if not self.game_state:
@@ -497,7 +493,7 @@ class App:
               if self.move_times else 0
         self.sc_time.set(str(avg))
 
-    # ── Human moves ───────────────────────────────────────────────────────────
+    # Human moves
 
     def _execute_pair(self, pair_idx: int) -> None:
         if not self.game_active or self.game_state.turn != self.human_role:
@@ -530,7 +526,7 @@ class App:
         self._render()
         self._check_end()
 
-    # ── Computer move ─────────────────────────────────────────────────────────
+    # Computer move
 
     def _computer_move(self) -> None:
         if not self.game_active or not self.game_state:
@@ -573,7 +569,7 @@ class App:
         self._render()
         self._check_end()
 
-    # ── End of game ───────────────────────────────────────────────────────────
+    # End of game
 
     def _check_end(self) -> None:
         if not self.game_state.is_terminal():
@@ -604,7 +600,7 @@ class App:
         if r == self.comp_role:    return 'Computer wins'
         return 'Draw'
 
-    # ── Experiments ───────────────────────────────────────────────────────────
+    # Experiments
 
     def _record_experiment(self, result: str) -> None:
         self.tracker.record(
