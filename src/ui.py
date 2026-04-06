@@ -1,7 +1,4 @@
-"""
-src/ui.py — Tkinter graphical interface for the Number String Game.
-Light theme, plain Tkinter, no external dependencies.
-"""
+# Tkinter graphical interface for the Number String Game — light theme, no external dependencies
 
 import tkinter as tk
 from tkinter import ttk, messagebox, filedialog

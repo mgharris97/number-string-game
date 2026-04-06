@@ -1,24 +1,17 @@
 MOD6_MAP = {7: 1, 8: 2, 9: 3, 10: 4, 11: 5, 12: 6}
 
 
+# Apply mod-6 substitution: 7→1, 8→2 … 12→6; returns (value, used_sub)
 def mod6(n):
-    """Apply mod-6 substitution: 7→1, 8→2 … 12→6. Returns (value, used_sub)."""
     if n > 6:
         return MOD6_MAP[n], True
     return n, False
 
 
+# Represents a single node in the game tree
+# nums: current number string (shrinks by 1 each move), points: running score,
+# bank: substitution bank, turn: 'first' or 'second'
 class GameState:
-    """
-    Represents a single node in the game tree.
-
-    Attributes
-    ----------
-    nums   : list[int]  current number string (shrinks by 1 each move)
-    points : int        running total score
-    bank   : int        substitution bank
-    turn   : str        'first' or 'second'
-    """
 
     def __init__(self, nums, points=0, bank=0, turn='first'):
         self.nums   = list(nums)
@@ -33,15 +26,8 @@ class GameState:
         return len(self.nums) == 1
 
     def get_moves(self):
-        """
-        Return all legal moves for the current state.
-
-        A move is one of:
-          {'type': 'pair',   'pair_idx': int}  — collapse fixed slot (pair_idx*2, pair_idx*2+1)
-          {'type': 'delete'}                   — remove last element (only when len is odd)
-
-        pair_idx * 2 is always an even index, so slots never cross boundaries.
-        """
+        # Return all legal moves: pair moves collapse a fixed slot (pair_idx*2, pair_idx*2+1);
+        # delete move removes the last element and is only available when the length is odd
         moves = []
         n = len(self.nums)
 
@@ -56,9 +42,7 @@ class GameState:
         return moves
 
     def apply_move(self, move):
-        """
-        Apply a move and return a NEW GameState. Never mutates self.
-        """
+        # Apply a move and return a NEW GameState; never mutates self
         s = self.clone()
 
         if move['type'] == 'pair':
@@ -81,14 +65,9 @@ class GameState:
         return s
 
     def get_result(self):
-        """
-        Returns 'first', 'second', 'draw', or None if not terminal.
-
-        Win conditions (checked at end of game):
-          final number even  AND  total score even  → first player wins
-          final number odd   AND  total score odd   → second player wins
-          otherwise                                 → draw
-        """
+        # Return 'first', 'second', 'draw', or None if not terminal
+        # First wins if final number even AND total score even;
+        # second wins if both odd; otherwise draw
         if not self.is_terminal():
             return None
 
